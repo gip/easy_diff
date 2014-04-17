@@ -1,6 +1,6 @@
 module EasyDiff
   module Core
-    def self.easy_diff(original, modified)
+    def self.easy_diff(original, modified, eq = lambda { |a,b| a == b })
       removed = nil
       added   = nil
 
@@ -19,14 +19,14 @@ module EasyDiff
         keys_removed.each{ |key| removed[key] = original[key].safe_dup }
         keys_added.each{ |key| added[key] = modified[key].safe_dup }
         keys_in_common.each do |key|
-          r, a = easy_diff original[key], modified[key]
+          r, a = easy_diff(original[key], modified[key],eq)
           removed[key] = r unless r.nil?
           added[key] = a unless a.nil?
         end
       elsif original.is_a?(Array) && modified.is_a?(Array)
         removed = original - modified
         added   = modified - original
-      elsif original != modified
+      elsif !eq.call(original, modified)
         removed   = original
         added     = modified
       end
